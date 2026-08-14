@@ -1336,10 +1336,14 @@
 
             function buildScenes(data) {
                 var scenes = [
-                    { eyebrow: 'Forgive me?', text: "I'm sorry, " + data.recipient + "." },
-                    { eyebrow: 'What happened', text: data.reason || "I made a mistake, and I know it." },
-                    { eyebrow: 'Why this matters', text: data.why || "Because what we have means more to me than any argument." }
+                    { eyebrow: 'Forgive me?', text: "I'm sorry, " + data.recipient + "." }
                 ];
+                if (data.reason) {
+                    scenes.push({ eyebrow: 'What happened', text: data.reason });
+                }
+                if (data.why) {
+                    scenes.push({ eyebrow: 'Why this matters', text: data.why });
+                }
                 (data.extras || []).forEach(function (extra) {
                     scenes.push({ eyebrow: extra.eyebrow, text: extra.text });
                 });
