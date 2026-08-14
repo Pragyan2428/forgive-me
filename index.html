@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Forgive me?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --pink-1: #FFE4EC;
+            --pink-2: #FFD3E0;
+            --pink-3: #FFC1D4;
+            --card: #FFF4F7;
+            --ink: #7A4A5C;
+            --ink-soft: #B98697;
+            --hot: #FF6B92;
+            --hot-dark: #E8547C;
+            --gold: #F3B562;
+            --font-display: 'Fredoka', sans-serif;
+            --font-body: 'Quicksand', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: var(--font-body);
+        }
+
+        body {
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at 15% 10%, #FFF0E8 0%, transparent 45%),
+                radial-gradient(circle at 85% 15%, #FFE0EA 0%, transparent 50%),
+                linear-gradient(160deg, #FFEDE4 0%, #FFDCE6 45%, #FFCBDD 100%);
+            overflow-x: hidden;
+            position: relative;
+            padding: calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left));
+        }
+
+        /* ---------- Floating decoration layer ---------- */
+        .deco {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .deco span {
+            position: absolute;
+            animation: float 7s ease-in-out infinite;
+            filter: drop-shadow(0 6px 10px rgba(200, 90, 120, 0.18));
+        }
+
+        .deco span svg {
+            display: block;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(var(--r, 0deg));
+            }
+
+            50% {
+                transform: translateY(-16px) rotate(calc(var(--r, 0deg) + 4deg));
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .deco span {
+                animation: none;
+            }
+
+            .petal {
+                animation: none;
+                display: none;
+            }
+
+            * {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+            }
+        }
+
+        .petal {
+            position: absolute;
+            top: -40px;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            8% {
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translateY(110vh) translateX(30px) rotate(200deg);
+                opacity: 0.2;
+            }
+        }
+
+        /* ---------- Card ---------- */
+        main {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: clamp(20px, 6vw, 32px);
+            padding: clamp(1.4rem, 6vw, 2.2rem) clamp(1.1rem, 5vw, 1.8rem) clamp(1.3rem, 5vw, 2rem);
+            text-align: center;
+            box-shadow:
+                0 30px 60px -20px rgba(214, 110, 140, 0.35),
+                0 2px 0 rgba(255, 255, 255, 0.8) inset;
+            border: 2px solid #FFFFFF;
+            position: relative;
+        }
+
+        /* Cat mascot, built in CSS */
+        .cat {
+            width: 128px;
+            height: 110px;
+            margin: 0 auto 0.6rem;
+            position: relative;
+            max-width: 100%;
+        }
+
+        .cat-face {
+            width: 120px;
+            height: 98px;
+            background: #FFFFFF;
+            border: 3px solid #4A3540;
+            border-radius: 50% 50% 46% 46%/58% 58% 42% 42%;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .ear {
+            position: absolute;
+            top: -22px;
+            width: 0;
+            height: 0;
+            border-left: 19px solid transparent;
+            border-right: 19px solid transparent;
+            border-bottom: 34px solid #FFFFFF;
+            filter: drop-shadow(0 -3px 0 #4A3540);
+        }
+
+        .ear.left {
+            left: 6px;
+            transform: rotate(-18deg);
+        }
+
+        .ear.right {
+            right: 6px;
+            transform: rotate(18deg);
+        }
+
+        .ear::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 14px;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 9px solid transparent;
+            border-right: 9px solid transparent;
+            border-bottom: 16px solid #FFD9E4;
+        }
+
+        .eye {
+            position: absolute;
+            top: 38px;
+            width: 9px;
+            height: 12px;
+            background: #4A3540;
+            border-radius: 50%;
+        }
+
+        .eye.left {
+            left: 30px;
+        }
+
+        .eye.right {
+            right: 30px;
+        }
+
+        .brow {
+            position: absolute;
+            top: 28px;
+            width: 16px;
+            height: 4px;
+            border-top: 3px solid #4A3540;
+            border-radius: 3px;
+        }
+
+        .brow.left {
+            left: 24px;
+            transform: rotate(10deg);
+        }
+
+        .brow.right {
+            right: 24px;
+            transform: rotate(-10deg);
+        }
+
+        .blush {
+            position: absolute;
+            top: 52px;
+            width: 16px;
+            height: 9px;
+            background: #FFB4C6;
+            border-radius: 50%;
+            opacity: 0.85;
+        }
+
+        .blush.left {
+            left: 14px;
+        }
+
+        .blush.right {
+            right: 14px;
+        }
+
+        .snout {
+            position: absolute;
+            left: 50%;
+            top: 58px;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 8px;
+        }
+
+        .snout::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 5px;
+            background: #4A3540;
+            border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+        }
+
+        .mouth {
+            position: absolute;
+            left: 50%;
+            top: 64px;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            border-bottom: 3px solid #4A3540;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .paw {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 26px;
+            height: 20px;
+            background: #FFFFFF;
+            border: 3px solid #4A3540;
+            border-radius: 50% 50% 45% 45%;
+        }
+
+        .sparkle {
+            position: absolute;
+            color: var(--gold);
+            font-size: 1rem;
+        }
+
+        .sparkle.s1 {
+            top: 6px;
+            left: -6px;
+        }
+
+        .sparkle.s2 {
+            top: -2px;
+            right: -10px;
+            font-size: 0.75rem;
+        }
+
+        .sparkle.s3 {
+            bottom: 14px;
+            left: -16px;
+            font-size: 0.7rem;
+        }
+
+        .eyebrow {
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin: 0 0 0.35rem;
+        }
+
+        h1.headline {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: clamp(1.6rem, 7vw, 2rem);
+            color: var(--hot-dark);
+            margin: 0.2rem 0 0.6rem;
+            line-height: 1.1;
+        }
+
+        p.sub {
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: clamp(0.9rem, 3.4vw, 0.98rem);
+            color: var(--ink);
+            line-height: 1.5;
+            margin: 0 0 1.6rem;
+            padding: 0 0.4rem;
+        }
+
+        /* Setup form fields, styled to match the card */
+        .field {
+            margin-bottom: 0.9rem;
+            text-align: left;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+            margin-bottom: 0.3rem;
+            padding-left: 0.2rem;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 16px;
+            padding: 0.65rem 0.9rem;
+            border-radius: 14px;
+            border: 2px solid var(--pink-2);
+            background: #FFFBFC;
+            color: var(--ink);
+            resize: vertical;
+            min-height: 2.5rem;
+        }
+
+        .field textarea {
+            min-height: 3.6rem;
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: #D9AAB8;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--hot);
+        }
+
+        .row2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.7rem;
+        }
+
+        /* Buttons: pill Yes/No pair, used both on consent screen and setup */
+        .btn-row {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-top: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            border-radius: 999px;
+            padding: 0.85rem 1.7rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+            min-height: 44px;
+        }
+
+        .btn-yes {
+            background: linear-gradient(180deg, #FF8CA8, var(--hot));
+            color: #fff;
+            box-shadow: 0 10px 18px -6px rgba(232, 84, 124, 0.55);
+        }
+
+        .btn-yes:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .btn-yes:active {
+            transform: scale(0.97);
+        }
+
+        .btn-no {
+            background: #FFF0F4;
+            color: var(--ink-soft);
+            border: 2px solid var(--pink-2);
+            position: relative;
+        }
+
+        .btn-no:hover {
+            transform: translateX(var(--dx, 0)) translateY(var(--dy, 0));
+        }
+
+        .primary-btn {
+            width: 100%;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1.02rem;
+            padding: 0.85rem 1rem;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #FF8CA8, var(--hot));
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 10px 18px -6px rgba(232, 84, 124, 0.55);
+            margin-top: 0.3rem;
+            transition: transform 0.15s ease, filter 0.15s ease;
+            min-height: 48px;
+        }
+
+        .primary-btn:hover {
+            filter: brightness(1.05);
+        }
+
+        .primary-btn:active {
+            transform: scale(0.98);
+        }
+
+        .photo-drop {
+            width: 100%;
+            min-height: 5rem;
+            border: 2px dashed var(--pink-3);
+            border-radius: 16px;
+            background: #FFFBFC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            padding: 0.5rem;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .photo-drop:hover {
+            border-color: var(--hot);
+            background: #FFF3F6;
+        }
+
+        .photo-drop span {
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+        }
+
+        .photo-drop img {
+            max-width: 100%;
+            max-height: 9rem;
+            border-radius: 10px;
+            display: block;
+        }
+
+        .story-photo-wrap {
+            margin: 0 auto 0.9rem;
+            width: clamp(120px, 34vw, 150px);
+            height: clamp(120px, 34vw, 150px);
+            border-radius: 20px;
+            padding: 6px;
+            background: #fff;
+            box-shadow: 0 10px 24px -10px rgba(214, 110, 140, 0.45), 0 0 0 2px var(--pink-2);
+            transform: rotate(-3deg);
+        }
+
+        .story-photo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 14px;
+            display: block;
+        }
+
+        .example-link {
+            display: block;
+            text-align: center;
+            margin-top: 0.9rem;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .example-link:hover {
+            color: var(--hot-dark);
+        }
+
+        /* Confirm ("ready") panel */
+        .ready-cat {
+            margin-bottom: 0.9rem;
+        }
+
+        .ready-badge {
+            position: absolute;
+            bottom: -4px;
+            right: 6px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #7FE0A8, #4FCB84);
+            color: #fff;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--card);
+            box-shadow: 0 4px 10px -2px rgba(79, 203, 132, 0.55);
+        }
+
+        #confirm .headline {
+            margin-bottom: 0.5rem;
+        }
+
+        #confirm .sub {
+            margin-bottom: 1.4rem;
+        }
+
+        #editBtn {
+            margin-top: 0.7rem;
+        }
+
+        .share-box {
+            text-align: left;
+            margin-bottom: 1.1rem;
+        }
+
+        .share-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+            margin-bottom: 0.3rem;
+            padding-left: 0.2rem;
+        }
+
+        .share-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .share-row input {
+            flex: 1;
+            min-width: 0;
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 12px;
+            border: 2px solid var(--pink-2);
+            background: #FFFBFC;
+            color: var(--ink-soft);
+            text-overflow: ellipsis;
+        }
+
+        .share-row input:focus {
+            outline: none;
+            border-color: var(--hot);
+        }
+
+        .copy-link-btn {
+            flex-shrink: 0;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: none;
+            border-radius: 12px;
+            padding: 0 1rem;
+            background: linear-gradient(180deg, #FF8CA8, var(--hot));
+            color: #fff;
+            cursor: pointer;
+            min-height: 40px;
+            transition: filter 0.15s ease, transform 0.15s ease;
+        }
+
+        .copy-link-btn:hover {
+            filter: brightness(1.05);
+        }
+
+        .copy-link-btn:active {
+            transform: scale(0.96);
+        }
+
+        .share-note {
+            font-size: 0.75rem;
+            color: var(--ink-soft);
+            line-height: 1.4;
+            margin: 0.5rem 0 0;
+            padding: 0 0.15rem;
+        }
+
+        .share-note.warn {
+            color: var(--hot-dark);
+            font-weight: 600;
+        }
+
+        /* Story panel */
+        .story-eyebrow {
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin: 0 0 0.7rem;
+        }
+
+        .story-text {
+            font-family: var(--font-display);
+            font-weight: 500;
+            font-size: clamp(1.15rem, 6vw, 1.5rem);
+            color: var(--ink);
+            line-height: 1.35;
+            margin: 0 0 0.4rem;
+            min-height: 3.4rem;
+            overflow-wrap: break-word;
+        }
+
+        .story-sig {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            color: var(--ink-soft);
+            margin: 0.6rem 0 1.2rem;
+        }
+
+        .scene {
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .scene.fading {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            margin: 0.2rem 0 1.3rem;
+            flex-wrap: wrap;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--pink-2);
+            transition: all 0.25s ease;
+        }
+
+        .dot.on {
+            background: var(--hot);
+            width: 18px;
+            border-radius: 4px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin-bottom: 0.6rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            min-height: 32px;
+        }
+
+        .nav-btn:hover {
+            color: var(--hot-dark);
+        }
+
+        .nav-btn[hidden] {
+            display: none;
+        }
+
+        .copy-btn {
+            margin-top: 0.6rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            text-decoration: underline;
+            min-height: 32px;
+        }
+
+        .copy-btn:hover {
+            color: var(--hot-dark);
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.1rem;
+        }
+
+        .badge {
+            font-size: 1.1rem;
+        }
+
+        footer.tag {
+            text-align: center;
+            margin-top: 1.1rem;
+            font-family: var(--font-body);
+            font-weight: 500;
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* ---------- Responsive breakpoints ---------- */
+
+        /* Very small phones (e.g. 320px wide) */
+        @media (max-width: 359px) {
+            main {
+                padding: 0.8rem;
+            }
+
+            .row2 {
+                grid-template-columns: 1fr;
+            }
+
+            .cat {
+                width: 104px;
+                height: 90px;
+            }
+
+            .cat-face {
+                width: 98px;
+                height: 80px;
+            }
+
+            .story-photo-wrap {
+                width: 110px;
+                height: 110px;
+            }
+
+            .btn {
+                padding: 0.75rem 1.3rem;
+                font-size: 0.92rem;
+            }
+
+            .btn-row {
+                gap: 0.6rem;
+            }
+        }
+
+        /* Small phones in general */
+        @media (max-width: 400px) {
+            main {
+                padding: 1rem;
+            }
+        }
+
+        /* Short viewports / landscape phones: shrink the mascot, tighten spacing */
+        @media (max-height: 640px) and (orientation: landscape) {
+            body {
+                align-items: flex-start;
+            }
+
+            main {
+                padding: 0.8rem;
+                max-width: 420px;
+            }
+
+            .card {
+                padding: 1rem 1.2rem 1.2rem;
+            }
+
+            .cat {
+                width: 80px;
+                height: 68px;
+                margin-bottom: 0.3rem;
+            }
+
+            .cat-face {
+                width: 74px;
+                height: 60px;
+            }
+
+            .story-photo-wrap {
+                width: 96px;
+                height: 96px;
+                margin-bottom: 0.5rem;
+            }
+
+            h1.headline {
+                font-size: 1.4rem;
+                margin: 0.1rem 0 0.4rem;
+            }
+
+            p.sub {
+                margin-bottom: 1rem;
+            }
+
+            .story-text {
+                font-size: 1.15rem;
+                min-height: auto;
+            }
+
+            .dots {
+                margin: 0.1rem 0 0.8rem;
+            }
+        }
+
+        @media (max-height: 480px) {
+
+            .cat,
+            .story-photo-wrap {
+                display: none;
+            }
+        }
+
+        /* Tablets and up: give the card a little more room and breathing space */
+        @media (min-width: 600px) {
+            main {
+                max-width: 440px;
+                padding: 2rem;
+            }
+
+            .card {
+                padding: 2.6rem 2.4rem 2.4rem;
+            }
+
+            h1.headline {
+                font-size: 2.2rem;
+            }
+
+            .story-text {
+                font-size: 1.65rem;
+            }
+        }
+
+        /* Larger desktops: keep the card comfortably sized, avoid it feeling lost */
+        @media (min-width: 1024px) {
+            main {
+                max-width: 460px;
+            }
+        }
+
+        /* Foldables / narrow but tall devices */
+        @media (max-width: 280px) {
+            h1.headline {
+                font-size: 1.4rem;
+            }
+
+            p.sub {
+                font-size: 0.82rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="deco" id="deco"></div>
+
+    <main>
+
+        <!-- ================= SETUP ================= -->
+        <section id="setup" class="panel active">
+            <h2 class="sr-only">Create a short apology sequence for someone, revealed one card at a time.</h2>
+            <div class="card">
+                <div class="cat">
+                    <div class="ear left"></div>
+                    <div class="ear right"></div>
+                    <div class="sparkle s1">&#10022;</div>
+                    <div class="sparkle s2">&#10022;</div>
+                    <div class="sparkle s3">&#10022;</div>
+                    <div class="cat-face">
+                        <div class="brow left"></div>
+                        <div class="brow right"></div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                        <div class="blush left"></div>
+                        <div class="blush right"></div>
+                        <div class="snout"></div>
+                        <div class="mouth"></div>
+                    </div>
+                    <div class="paw"></div>
+                </div>
+
+                <p class="eyebrow">Say sorry, beautifully</p>
+                <h1 class="headline">Forgive me?</h1>
+                <p class="sub">Fill in a few words and I'll turn it into a little card sequence, made just for them.
+                    Takes about 30 seconds. &#128140;</p>
+
+                <form id="setupForm">
+                    <div class="row2">
+                        <div class="field">
+                            <label for="recipient">Their name</label>
+                            <input id="recipient" type="text" placeholder="Alex" autocomplete="off">
+                        </div>
+                        <div class="field">
+                            <label for="yourName">Your name</label>
+                            <input id="yourName" type="text" placeholder="Sam" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="reason">What are you sorry for? <span
+                                style="opacity:0.6;font-weight:500;">(optional)</span></label>
+                        <textarea id="reason"
+                            placeholder="I snapped at you when you were only trying to help"></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="why">Why they matter to you <span
+                                style="opacity:0.6;font-weight:500;">(optional)</span></label>
+                        <textarea id="why" placeholder="You've stuck by me through the hard weeks"></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="photoInput">A photo of you two <span
+                                style="opacity:0.6;font-weight:500;">(optional)</span></label>
+                        <div id="photoDrop" class="photo-drop">
+                            <img id="photoPreview" alt="" hidden>
+                            <span id="photoDropText">&#128444;&#65039; Tap to add a photo</span>
+                        </div>
+                        <input id="photoInput" type="file" accept="image/*" class="sr-only">
+                    </div>
+                    <button type="submit" class="primary-btn">Create their apology &#8594;</button>
+                </form>
+                <button type="button" id="exampleLink" class="example-link">See it with an example first</button>
+            </div>
+        </section>
+
+        <!-- ================= CONFIRM ================= -->
+        <section id="confirm" class="panel">
+            <div class="card">
+                <div class="cat ready-cat">
+                    <div class="ear left"></div>
+                    <div class="ear right"></div>
+                    <div class="sparkle s1">&#10022;</div>
+                    <div class="sparkle s2">&#10022;</div>
+                    <div class="sparkle s3">&#10022;</div>
+                    <div class="cat-face">
+                        <div class="brow left"></div>
+                        <div class="brow right"></div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                        <div class="blush left"></div>
+                        <div class="blush right"></div>
+                        <div class="snout"></div>
+                        <div class="mouth"></div>
+                    </div>
+                    <div class="paw"></div>
+                    <div class="ready-badge" aria-hidden="true">&#10003;</div>
+                </div>
+
+                <p class="eyebrow">All set</p>
+                <h1 class="headline">Your apology<br>is ready! &#128140;</h1>
+                <p class="sub" id="confirmSub">A little card sequence for them, ready whenever you want to show it.</p>
+
+                <div class="share-box">
+                    <label for="shareLink" class="share-label">Link to send them</label>
+                    <div class="share-row">
+                        <input id="shareLink" type="text" readonly>
+                        <button type="button" id="copyLinkBtn" class="copy-link-btn">Copy</button>
+                    </div>
+                    <p class="share-note" id="shareNote"></p>
+                </div>
+
+                <button type="button" id="viewBtn" class="primary-btn">View it &#8594;</button>
+                <button type="button" id="editBtn" class="example-link">Edit details</button>
+            </div>
+        </section>
+
+        <!-- ================= STORY ================= -->
+        <section id="story" class="panel">
+            <div class="card">
+                <button type="button" id="backBtn" class="nav-btn" hidden>&#8592; Back</button>
+
+                <div class="story-photo-wrap" id="storyPhotoWrap" hidden>
+                    <img id="storyPhoto" alt="A photo of the two of you">
+                </div>
+
+                <div class="cat" id="storyCat">
+                    <div class="ear left"></div>
+                    <div class="ear right"></div>
+                    <div class="sparkle s1">&#10022;</div>
+                    <div class="sparkle s2">&#10022;</div>
+                    <div class="sparkle s3">&#10022;</div>
+                    <div class="cat-face">
+                        <div class="brow left"></div>
+                        <div class="brow right"></div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                        <div class="blush left"></div>
+                        <div class="blush right"></div>
+                        <div class="snout"></div>
+                        <div class="mouth"></div>
+                    </div>
+                    <div class="paw"></div>
+                </div>
+
+                <div class="scene" id="scene">
+                    <p class="story-eyebrow" id="sceneEyebrow"></p>
+                    <h1 class="story-text" id="sceneText"></h1>
+                    <p class="story-sig" id="sceneSignature" style="display:none;"></p>
+                </div>
+
+                <div class="dots" id="dots" aria-hidden="true"></div>
+
+                <div class="btn-row" id="storyActions">
+                    <button type="button" id="noBtn" class="btn btn-no">Not yet</button>
+                    <button type="button" id="nextBtn" class="btn btn-yes">Next &#8594;</button>
+                </div>
+                <button type="button" id="copyBtn" class="copy-btn" style="display:none;">Copy the message</button>
+                <div class="badge-row" id="badgeRow" style="display:none;">
+                    <span class="badge">&#128147;</span><span class="badge">&#129522;</span><span
+                        class="badge">&#128140;</span>
+                </div>
+            </div>
+            <footer class="tag">A little site to say what words couldn't.</footer>
+        </section>
+
+    </main>
+
+    <script>
+        (function () {
+            /* ---------- floating background decoration ---------- */
+            var decoHost = document.getElementById('deco');
+            var stickers = ['\u{1F497}', '\u{1FA79}', '\u{1F49B}', '\u{1F48C}', '\u2728'];
+            var positions = [
+                { top: '8%', left: '6%' }, { top: '14%', right: '8%' }, { top: '55%', left: '4%' },
+                { top: '62%', right: '6%' }, { top: '80%', left: '14%' }, { top: '4%', left: '42%' }
+            ];
+            positions.forEach(function (pos, i) {
+                var el = document.createElement('span');
+                el.textContent = stickers[i % stickers.length];
+                el.style.fontSize = (1.3 + (i % 3) * 0.4) + 'rem';
+                el.style.top = pos.top || '';
+                el.style.left = pos.left || '';
+                el.style.right = pos.right || '';
+                el.style.setProperty('--r', (i % 2 ? '-8deg' : '8deg'));
+                el.style.animationDelay = (i * 0.6) + 's';
+                el.style.animationDuration = (6 + i) + 's';
+                el.style.opacity = '0.85';
+                decoHost.appendChild(el);
+            });
+            var petalEmoji = ['\u{1F338}', '\u{1F338}', '\u{1F338}'];
+            for (var p = 0; p < 10; p++) {
+                var pet = document.createElement('span');
+                pet.className = 'petal';
+                pet.textContent = petalEmoji[p % petalEmoji.length];
+                pet.style.left = (Math.random() * 100) + 'vw';
+                pet.style.fontSize = (0.8 + Math.random() * 0.8) + 'rem';
+                pet.style.animationDuration = (9 + Math.random() * 8) + 's';
+                pet.style.animationDelay = (Math.random() * 8) + 's';
+                decoHost.appendChild(pet);
+            }
+
+            /* ---------- app logic ---------- */
+            var setupPanel = document.getElementById('setup');
+            var confirmPanel = document.getElementById('confirm');
+            var storyPanel = document.getElementById('story');
+            var setupForm = document.getElementById('setupForm');
+            var exampleLink = document.getElementById('exampleLink');
+            var recipientInput = document.getElementById('recipient');
+            var yourNameInput = document.getElementById('yourName');
+            var reasonInput = document.getElementById('reason');
+            var whyInput = document.getElementById('why');
+            var photoDrop = document.getElementById('photoDrop');
+            var photoInput = document.getElementById('photoInput');
+            var photoPreview = document.getElementById('photoPreview');
+            var photoDropText = document.getElementById('photoDropText');
+            var storyPhotoWrap = document.getElementById('storyPhotoWrap');
+            var storyPhoto = document.getElementById('storyPhoto');
+            var storyCat = document.getElementById('storyCat');
+            var confirmSub = document.getElementById('confirmSub');
+            var viewBtn = document.getElementById('viewBtn');
+            var editBtn = document.getElementById('editBtn');
+            var shareLinkInput = document.getElementById('shareLink');
+            var copyLinkBtn = document.getElementById('copyLinkBtn');
+            var shareNote = document.getElementById('shareNote');
+            var photoDataUrl = '';
+
+            photoDrop.addEventListener('click', function () { photoInput.click(); });
+            photoInput.addEventListener('change', function () {
+                var file = photoInput.files && photoInput.files[0];
+                if (!file) return;
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    photoDataUrl = e.target.result;
+                    photoPreview.src = photoDataUrl;
+                    photoPreview.hidden = false;
+                    photoDropText.hidden = true;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            var sceneEl = document.getElementById('scene');
+            var eyebrowEl = document.getElementById('sceneEyebrow');
+            var textEl = document.getElementById('sceneText');
+            var signatureEl = document.getElementById('sceneSignature');
+            var dotsEl = document.getElementById('dots');
+            var nextBtn = document.getElementById('nextBtn');
+            var noBtn = document.getElementById('noBtn');
+            var backBtn = document.getElementById('backBtn');
+            var copyBtn = document.getElementById('copyBtn');
+            var badgeRow = document.getElementById('badgeRow');
+            var storyActions = document.getElementById('storyActions');
+
+            var state = { scenes: [], index: 0, pendingData: null };
+
+            /* ---------- shareable link: pack text fields into the URL itself ---------- */
+            function encodeApology(data) {
+                try {
+                    return btoa(encodeURIComponent(JSON.stringify({
+                        r: data.recipient, y: data.yourName, x: data.reason, w: data.why
+                    })));
+                } catch (e) { return ''; }
+            }
+            function decodeApology(str) {
+                try {
+                    var obj = JSON.parse(decodeURIComponent(atob(str)));
+                    if (!obj || !obj.r) return null;
+                    return { recipient: obj.r, yourName: obj.y || 'someone who loves you', reason: obj.x || '', why: obj.w || '' };
+                } catch (e) { return null; }
+            }
+            function buildShareLink(data) {
+                var base = location.href.split('#')[0];
+                return base + '#a=' + encodeApology(data);
+            }
+            function tryLoadSharedApology() {
+                var match = (location.hash || '').match(/a=([^&]+)/);
+                if (!match) return false;
+                var decoded = decodeApology(match[1]);
+                if (!decoded) return false;
+                startWith({ recipient: decoded.recipient, yourName: decoded.yourName, reason: decoded.reason, why: decoded.why, photo: '' });
+                return true;
+            }
+
+            function buildScenes(data) {
+                return [
+                    { eyebrow: 'Forgive me?', text: "I'm sorry, " + data.recipient + "." },
+                    { eyebrow: 'What happened', text: data.reason || "I made a mistake, and I know it." },
+                    { eyebrow: "What I've realized", text: "You deserved better than that. I care about you more than being right." },
+                    { eyebrow: 'Why this matters', text: data.why || "Because what we have means more to me than any argument." },
+                    { eyebrow: 'So, simply \u2014', text: "I'm really sorry, " + data.recipient + ". Truly.", signature: '\u2014 ' + data.yourName }
+                ];
+            }
+
+            function buildDots() {
+                dotsEl.innerHTML = '';
+                for (var i = 0; i < state.scenes.length; i++) {
+                    var d = document.createElement('span');
+                    d.className = 'dot';
+                    dotsEl.appendChild(d);
+                }
+            }
+
+            function renderScene(skipFade) {
+                var scene = state.scenes[state.index];
+
+                function apply() {
+                    eyebrowEl.textContent = scene.eyebrow;
+                    textEl.textContent = scene.text;
+                    if (scene.signature) {
+                        signatureEl.textContent = scene.signature;
+                        signatureEl.style.display = 'block';
+                    } else {
+                        signatureEl.style.display = 'none';
+                    }
+
+                    var dots = dotsEl.querySelectorAll('.dot');
+                    dots.forEach(function (d, i) { d.classList.toggle('on', i === state.index); });
+
+                    backBtn.hidden = state.index === 0;
+
+                    var isFirst = state.index === 0;
+                    var isLast = state.index === state.scenes.length - 1;
+
+                    noBtn.style.display = isFirst ? 'inline-block' : 'none';
+                    noBtn.textContent = 'Not yet';
+                    noBtn.style.setProperty('--dx', '0px');
+                    noBtn.style.setProperty('--dy', '0px');
+
+                    nextBtn.textContent = isFirst ? 'Yes \u{1F495}' : (isLast ? 'Start over \u21BA' : 'Next \u2192');
+                    copyBtn.style.display = isLast ? 'inline-block' : 'none';
+                    copyBtn.textContent = 'Copy the message';
+                    badgeRow.style.display = isLast ? 'flex' : 'none';
+
+                    sceneEl.classList.remove('fading');
+                }
+
+                if (skipFade) { apply(); return; }
+                sceneEl.classList.add('fading');
+                setTimeout(apply, 200);
+            }
+
+            function showPanel(panel) {
+                [setupPanel, confirmPanel, storyPanel].forEach(function (p) {
+                    p.classList.toggle('active', p === panel);
+                });
+            }
+            function showStory() { showPanel(storyPanel); }
+            function showSetup() { showPanel(setupPanel); }
+            function showConfirm(data) {
+                confirmSub.textContent = 'A little card sequence for ' + data.recipient + ', ready whenever you want to show it.';
+                shareLinkInput.value = buildShareLink(data);
+                var isFile = location.protocol === 'file:';
+                shareNote.textContent = isFile
+                    ? 'This link only works once this page is hosted online (e.g. GitHub Pages, Netlify) \u2014 right now it points to the file on your device, not a public web address.'
+                    : 'Anyone with this link goes straight to the apology above \u2014 no photo included, since photos make links too long.';
+                shareNote.classList.toggle('warn', isFile);
+                showPanel(confirmPanel);
+            }
+
+            function startWith(data) {
+                state.scenes = buildScenes(data);
+                state.index = 0;
+                buildDots();
+
+                if (data.photo) {
+                    storyPhoto.src = data.photo;
+                    storyPhotoWrap.hidden = false;
+                    storyCat.hidden = true;
+                } else {
+                    storyPhotoWrap.hidden = true;
+                    storyCat.hidden = false;
+                }
+
+                showStory();
+                renderScene(true);
+            }
+
+            function collectFormData() {
+                return {
+                    recipient: recipientInput.value.trim() || 'you',
+                    yourName: yourNameInput.value.trim() || 'someone who loves you',
+                    reason: reasonInput.value.trim(),
+                    why: whyInput.value.trim(),
+                    photo: photoDataUrl
+                };
+            }
+
+            setupForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                state.pendingData = collectFormData();
+                showConfirm(state.pendingData);
+            });
+
+            exampleLink.addEventListener('click', function () {
+                recipientInput.value = 'Maya';
+                yourNameInput.value = 'Theo';
+                reasonInput.value = 'I got defensive instead of just listening to you';
+                whyInput.value = "You're the person I trust with the bad days, not just the good ones";
+                photoDataUrl = photoDataUrl || '';
+                state.pendingData = collectFormData();
+                showConfirm(state.pendingData);
+            });
+
+            viewBtn.addEventListener('click', function () {
+                if (state.pendingData) startWith(state.pendingData);
+            });
+
+            editBtn.addEventListener('click', function () {
+                showSetup();
+            });
+
+            copyLinkBtn.addEventListener('click', function () {
+                shareLinkInput.focus();
+                shareLinkInput.select();
+                shareLinkInput.setSelectionRange(0, 99999);
+                function flashCopied() {
+                    copyLinkBtn.textContent = 'Copied \u2713';
+                    setTimeout(function () { copyLinkBtn.textContent = 'Copy'; }, 1600);
+                }
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(shareLinkInput.value).then(flashCopied).catch(function () {
+                        try { document.execCommand('copy'); flashCopied(); } catch (e) { }
+                    });
+                } else {
+                    try { document.execCommand('copy'); flashCopied(); } catch (e) { }
+                }
+            });
+
+            nextBtn.addEventListener('click', function () {
+                var isLast = state.index === state.scenes.length - 1;
+                if (isLast) { showSetup(); return; }
+                state.index++;
+                renderScene();
+            });
+
+            backBtn.addEventListener('click', function () {
+                if (state.index === 0) return;
+                state.index--;
+                renderScene();
+            });
+
+            /* playful dodge for "Not yet" on the very first card */
+            noBtn.addEventListener('mouseenter', function () {
+                if (state.index !== 0) return;
+                var maxX = storyActions.clientWidth * 0.35;
+                var dx = (Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * maxX);
+                var dy = (Math.random() - 0.5) * 24;
+                noBtn.style.setProperty('--dx', dx + 'px');
+                noBtn.style.setProperty('--dy', dy + 'px');
+            });
+            noBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+
+            copyBtn.addEventListener('click', function () {
+                var lines = state.scenes.slice(1).map(function (s) {
+                    return s.signature ? (s.text + '\n' + s.signature) : s.text;
+                });
+                var message = lines.join('\n\n');
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(message).then(function () {
+                        copyBtn.textContent = 'Copied \u2713';
+                        setTimeout(function () { copyBtn.textContent = 'Copy the message'; }, 1600);
+                    });
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (!storyPanel.classList.contains('active')) return;
+                if (e.key === 'ArrowRight') nextBtn.click();
+                if (e.key === 'ArrowLeft' && !backBtn.hidden) backBtn.click();
+            });
+
+            /* if this page was opened via a shared link, jump straight to the apology */
+            tryLoadSharedApology();
+        })();
+    </script>
+
+</body>
+
+</html>
