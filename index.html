@@ -824,8 +824,19 @@
         .photo-drop img {
             max-width: 100%;
             max-height: 9rem;
+            min-height: 3.5rem;
+            width: auto;
+            object-fit: contain;
             border-radius: 10px;
             display: block;
+        }
+
+        .photo-error {
+            font-size: 0.78rem;
+            color: var(--hot-dark);
+            font-weight: 600;
+            margin: 0.4rem 0 0;
+            padding: 0 0.15rem;
         }
 
         .story-photo-wrap {
@@ -1166,6 +1177,125 @@
             color: var(--ink-soft);
         }
 
+        /* ---- Admin / saved history panel ---- */
+        .admin-link {
+            margin-top: 0.4rem;
+            opacity: 0.85;
+        }
+
+        .admin-card {
+            text-align: left;
+        }
+
+        .admin-card .eyebrow,
+        .admin-headline,
+        .admin-sub {
+            text-align: center;
+        }
+
+        .admin-sub {
+            margin-bottom: 1.2rem;
+        }
+
+        .admin-empty {
+            text-align: center;
+            color: var(--ink-soft);
+            font-size: 0.9rem;
+            padding: 1.5rem 0.5rem;
+        }
+
+        .admin-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            max-height: 46vh;
+            overflow-y: auto;
+            margin-bottom: 0.6rem;
+        }
+
+        .admin-item {
+            border: 2px solid var(--pink-2);
+            border-radius: 16px;
+            padding: 0.75rem 0.85rem;
+            background: #FFFBFC;
+            animation: cardPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        .admin-item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .admin-item-name {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--hot-dark);
+        }
+
+        .admin-item-date {
+            font-size: 0.72rem;
+            color: var(--ink-soft);
+            white-space: nowrap;
+        }
+
+        .admin-item-preview {
+            font-size: 0.85rem;
+            color: var(--ink);
+            margin: 0.35rem 0 0.6rem;
+            line-height: 1.4;
+            overflow-wrap: break-word;
+        }
+
+        .admin-item-count {
+            font-size: 0.72rem;
+            color: var(--ink-soft);
+            margin: 0 0 0.5rem;
+        }
+
+        .admin-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-item-actions button {
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.78rem;
+            border-radius: 10px;
+            padding: 0.4rem 0.7rem;
+            border: none;
+            cursor: pointer;
+            min-height: 32px;
+        }
+
+        .admin-view-btn {
+            background: linear-gradient(180deg, #FF8CA8, var(--hot));
+            color: #fff;
+        }
+
+        .admin-link-btn {
+            background: var(--pink-1);
+            color: var(--ink);
+        }
+
+        .admin-delete-btn {
+            background: none;
+            color: var(--ink-soft);
+            text-decoration: underline;
+        }
+
+        .admin-delete-btn:hover {
+            color: var(--hot-dark);
+        }
+
+        .admin-clear-btn {
+            margin-top: 0.5rem;
+        }
+
         .sr-only {
             position: absolute;
             width: 1px;
@@ -1389,15 +1519,17 @@
                     <div class="field">
                         <label for="photoInput">A photo of you two <span
                                 style="opacity:0.6;font-weight:500;">(optional)</span></label>
-                        <div id="photoDrop" class="photo-drop">
+                        <label id="photoDrop" for="photoInput" class="photo-drop">
                             <img id="photoPreview" alt="" hidden>
                             <span id="photoDropText">&#128444;&#65039; Tap to add a photo</span>
-                        </div>
+                        </label>
                         <input id="photoInput" type="file" accept="image/*" class="sr-only">
+                        <p id="photoError" class="photo-error" hidden></p>
                     </div>
                     <button type="submit" class="primary-btn">Create their apology &#8594;</button>
                 </form>
                 <button type="button" id="exampleLink" class="example-link">See it with an example first</button>
+                <button type="button" id="adminLink" class="example-link admin-link">&#128203; View saved apologies</button>
             </div>
         </section>
 
@@ -1501,6 +1633,26 @@
             <footer class="tag">A little site to say what words couldn't.</footer>
         </section>
 
+        <!-- ================= ADMIN ================= -->
+        <section id="admin" class="panel">
+            <div class="card admin-card">
+                <button type="button" id="adminBackBtn" class="nav-btn">&#8592; Back</button>
+                <p class="eyebrow">For future use</p>
+                <h1 class="headline admin-headline">Saved apologies</h1>
+                <p class="sub admin-sub">Every apology you've created on this device, kept here so you can revisit
+                    or resend them.</p>
+
+                <div id="adminEmpty" class="admin-empty" hidden>
+                    <p>Nothing saved yet. Create an apology and it'll show up here.</p>
+                </div>
+
+                <div id="adminList" class="admin-list"></div>
+
+                <button type="button" id="adminClearBtn" class="example-link admin-clear-btn" hidden>Clear all
+                    saved apologies</button>
+            </div>
+        </section>
+
     </main>
 
     <script>
@@ -1541,6 +1693,12 @@
             var setupPanel = document.getElementById('setup');
             var confirmPanel = document.getElementById('confirm');
             var storyPanel = document.getElementById('story');
+            var adminPanel = document.getElementById('admin');
+            var adminLink = document.getElementById('adminLink');
+            var adminBackBtn = document.getElementById('adminBackBtn');
+            var adminList = document.getElementById('adminList');
+            var adminEmpty = document.getElementById('adminEmpty');
+            var adminClearBtn = document.getElementById('adminClearBtn');
             var setupForm = document.getElementById('setupForm');
             var exampleLink = document.getElementById('exampleLink');
             var recipientInput = document.getElementById('recipient');
@@ -1612,11 +1770,25 @@
                 extraScenesContainer.innerHTML = '';
             }
 
-            photoDrop.addEventListener('click', function () { photoInput.click(); });
+            var photoError = document.getElementById('photoError');
             photoInput.addEventListener('change', function () {
+                photoError.hidden = true;
                 var file = photoInput.files && photoInput.files[0];
                 if (!file) return;
+                if (!/^image\//.test(file.type)) {
+                    photoError.textContent = "That doesn't look like an image file — try a JPG or PNG.";
+                    photoError.hidden = false;
+                    return;
+                }
+                if (file.size > 6 * 1024 * 1024) {
+                    photoError.textContent = 'That photo is quite large — try one under 6MB for a smoother experience.';
+                    photoError.hidden = false;
+                }
                 var reader = new FileReader();
+                reader.onerror = function () {
+                    photoError.textContent = "Couldn't read that photo — please try a different one.";
+                    photoError.hidden = false;
+                };
                 reader.onload = function (e) {
                     photoDataUrl = e.target.result;
                     photoPreview.src = photoDataUrl;
@@ -1744,12 +1916,13 @@
             }
 
             function showPanel(panel) {
-                [setupPanel, confirmPanel, storyPanel].forEach(function (p) {
+                [setupPanel, confirmPanel, storyPanel, adminPanel].forEach(function (p) {
                     p.classList.toggle('active', p === panel);
                 });
             }
             function showStory() { showPanel(storyPanel); }
             function showSetup() { showPanel(setupPanel); }
+            function showAdmin() { renderAdminList(); showPanel(adminPanel); }
             function showConfirm(data) {
                 confirmSub.textContent = 'A little ' + data._sceneCount + '-card sequence for ' + data.recipient + ', ready whenever you want to show it.';
                 shareLinkInput.value = buildShareLink(data);
@@ -1792,9 +1965,124 @@
                 return data;
             }
 
+            /* ---------- admin / saved-history storage (localStorage, this device only) ---------- */
+            var STORAGE_KEY = 'forgiveMeApologies';
+
+            function loadSavedApologies() {
+                try {
+                    var raw = localStorage.getItem(STORAGE_KEY);
+                    var list = raw ? JSON.parse(raw) : [];
+                    return Array.isArray(list) ? list : [];
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            function saveApologyEntry(data) {
+                try {
+                    var list = loadSavedApologies();
+                    list.unshift({
+                        id: 'a' + Date.now() + Math.random().toString(36).slice(2, 7),
+                        createdAt: Date.now(),
+                        recipient: data.recipient,
+                        yourName: data.yourName,
+                        reason: data.reason,
+                        why: data.why,
+                        extras: data.extras || [],
+                        photo: data.photo || '',
+                        link: buildShareLink(data)
+                    });
+                    /* keep storage from growing unbounded */
+                    if (list.length > 100) list = list.slice(0, 100);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+                } catch (e) {
+                    /* storage full or unavailable (e.g. private browsing) \u2014 fail silently, creation still works */
+                }
+            }
+
+            function deleteApologyEntry(id) {
+                var list = loadSavedApologies().filter(function (item) { return item.id !== id; });
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) { }
+                renderAdminList();
+            }
+
+            function clearAllApologies() {
+                try { localStorage.removeItem(STORAGE_KEY); } catch (e) { }
+                renderAdminList();
+            }
+
+            function formatSavedDate(ts) {
+                try {
+                    var d = new Date(ts);
+                    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                } catch (e) { return ''; }
+            }
+
+            function renderAdminList() {
+                var list = loadSavedApologies();
+                adminList.innerHTML = '';
+                adminEmpty.hidden = list.length !== 0;
+                adminClearBtn.hidden = list.length === 0;
+
+                list.forEach(function (item) {
+                    var preview = item.reason || item.why || (item.extras[0] && item.extras[0].text) || 'A little apology, ready to share.';
+                    var cardCount = 2 + (item.reason ? 1 : 0) + (item.why ? 1 : 0) + (item.extras ? item.extras.length : 0);
+
+                    var el = document.createElement('div');
+                    el.className = 'admin-item';
+                    el.innerHTML =
+                        '<div class="admin-item-top">' +
+                        '<span class="admin-item-name"></span>' +
+                        '<span class="admin-item-date"></span>' +
+                        '</div>' +
+                        '<p class="admin-item-preview"></p>' +
+                        '<p class="admin-item-count"></p>' +
+                        '<div class="admin-item-actions">' +
+                        '<button type="button" class="admin-view-btn">View</button>' +
+                        '<button type="button" class="admin-link-btn">Copy link</button>' +
+                        '<button type="button" class="admin-delete-btn">Delete</button>' +
+                        '</div>';
+
+                    el.querySelector('.admin-item-name').textContent = 'For ' + item.recipient;
+                    el.querySelector('.admin-item-date').textContent = formatSavedDate(item.createdAt);
+                    el.querySelector('.admin-item-preview').textContent = preview;
+                    el.querySelector('.admin-item-count').textContent = cardCount + ' card' + (cardCount === 1 ? '' : 's') + ' \u00b7 from ' + item.yourName;
+
+                    el.querySelector('.admin-view-btn').addEventListener('click', function () {
+                        startWith({
+                            recipient: item.recipient, yourName: item.yourName, reason: item.reason,
+                            why: item.why, extras: item.extras, photo: item.photo
+                        });
+                    });
+                    el.querySelector('.admin-link-btn').addEventListener('click', function (btn) {
+                        var button = btn.currentTarget;
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(item.link).then(function () {
+                                button.textContent = 'Copied \u2713';
+                                setTimeout(function () { button.textContent = 'Copy link'; }, 1400);
+                            });
+                        }
+                    });
+                    el.querySelector('.admin-delete-btn').addEventListener('click', function () {
+                        deleteApologyEntry(item.id);
+                    });
+
+                    adminList.appendChild(el);
+                });
+            }
+
+            adminLink.addEventListener('click', showAdmin);
+            adminBackBtn.addEventListener('click', showSetup);
+            adminClearBtn.addEventListener('click', function () {
+                if (window.confirm('Delete every saved apology on this device? This can\'t be undone.')) {
+                    clearAllApologies();
+                }
+            });
+
             setupForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 state.pendingData = collectFormData();
+                saveApologyEntry(state.pendingData);
                 showConfirm(state.pendingData);
             });
 
