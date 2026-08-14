@@ -1530,6 +1530,7 @@
                 </form>
                 <button type="button" id="exampleLink" class="example-link">See it with an example first</button>
                 <button type="button" id="adminLink" class="example-link admin-link">&#128203; View saved apologies</button>
+                <button type="button" id="resetFormBtn" class="example-link">&#10227; Clear form &amp; start a brand-new apology</button>
             </div>
         </section>
 
@@ -1701,6 +1702,7 @@
             var adminClearBtn = document.getElementById('adminClearBtn');
             var setupForm = document.getElementById('setupForm');
             var exampleLink = document.getElementById('exampleLink');
+            var resetFormBtn = document.getElementById('resetFormBtn');
             var recipientInput = document.getElementById('recipient');
             var yourNameInput = document.getElementById('yourName');
             var reasonInput = document.getElementById('reason');
@@ -1770,7 +1772,69 @@
                 extraScenesContainer.innerHTML = '';
             }
 
+            function resetWholeForm() {
+                setupForm.reset();
+                recipientInput.value = '';
+                yourNameInput.value = '';
+                reasonInput.value = '';
+                whyInput.value = '';
+                clearExtraScenes();
+                photoDataUrl = '';
+                photoInput.value = '';
+                photoPreview.src = '';
+                photoPreview.hidden = true;
+                photoDropText.hidden = false;
+                photoError.hidden = true;
+            }
+
+            resetFormBtn.addEventListener('click', function () {
+                resetWholeForm();
+            });
+
             var photoError = document.getElementById('photoError');
+
+            /* Resize + compress the photo client-side so it's small enough to embed
+               directly in the share link (the link has no server behind it, so this
+               is the only way the *recipient* actually sees the photo too). */
+            function compressImage(file, callback) {
+                var reader = new FileReader();
+                reader.onerror = function () { callback(null, 'read-error'); };
+                reader.onload = function (e) {
+                    var img = new Image();
+                    img.onerror = function () { callback(null, 'decode-error'); };
+                    img.onload = function () {
+                        var maxDim = 480;
+                        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+                        var w = Math.max(1, Math.round(img.width * scale));
+                        var h = Math.max(1, Math.round(img.height * scale));
+                        var canvas = document.createElement('canvas');
+                        var ctx = canvas.getContext('2d');
+                        var quality = 0.72;
+                        var dataUrl = '';
+                        var attempts = 0;
+                        do {
+                            canvas.width = w;
+                            canvas.height = h;
+                            ctx.clearRect(0, 0, w, h);
+                            ctx.drawImage(img, 0, 0, w, h);
+                            dataUrl = canvas.toDataURL('image/jpeg', quality);
+                            if (dataUrl.length > 130000) {
+                                if (quality > 0.4) {
+                                    quality -= 0.15;
+                                } else {
+                                    w = Math.round(w * 0.8);
+                                    h = Math.round(h * 0.8);
+                                }
+                            }
+                            attempts++;
+                        } while (dataUrl.length > 130000 && attempts < 6 && w > 60 && h > 60);
+                        callback(dataUrl, null);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
             photoInput.addEventListener('change', function () {
                 photoError.hidden = true;
                 var file = photoInput.files && photoInput.files[0];
@@ -1780,22 +1844,26 @@
                     photoError.hidden = false;
                     return;
                 }
-                if (file.size > 6 * 1024 * 1024) {
-                    photoError.textContent = 'That photo is quite large — try one under 6MB for a smoother experience.';
+                if (file.size > 15 * 1024 * 1024) {
+                    photoError.textContent = 'That photo is quite large — try one under 15MB.';
                     photoError.hidden = false;
+                    return;
                 }
-                var reader = new FileReader();
-                reader.onerror = function () {
-                    photoError.textContent = "Couldn't read that photo — please try a different one.";
-                    photoError.hidden = false;
-                };
-                reader.onload = function (e) {
-                    photoDataUrl = e.target.result;
+                compressImage(file, function (dataUrl, err) {
+                    if (err || !dataUrl) {
+                        photoError.textContent = "Couldn't read that photo — please try a different one.";
+                        photoError.hidden = false;
+                        return;
+                    }
+                    photoDataUrl = dataUrl;
                     photoPreview.src = photoDataUrl;
                     photoPreview.hidden = false;
                     photoDropText.hidden = true;
-                };
-                reader.readAsDataURL(file);
+                    if (photoDataUrl.length > 130000) {
+                        photoError.textContent = "This photo makes the link quite long — it'll still work, but some messaging apps may trim very long links. A simpler photo (or a closer crop) helps.";
+                        photoError.hidden = false;
+                    }
+                });
             });
 
             var sceneEl = document.getElementById('scene');
@@ -1812,11 +1880,13 @@
 
             var state = { scenes: [], index: 0, pendingData: null };
 
-            /* ---------- shareable link: pack text fields into the URL itself ---------- */
+            /* ---------- shareable link: pack text fields (and now the compressed
+               photo) into the URL itself, since there is no backend ---------- */
             function encodeApology(data) {
                 try {
                     return btoa(encodeURIComponent(JSON.stringify({
-                        r: data.recipient, y: data.yourName, x: data.reason, w: data.why, e: data.extras || []
+                        r: data.recipient, y: data.yourName, x: data.reason, w: data.why,
+                        e: data.extras || [], p: data.photo || ''
                     })));
                 } catch (e) { return ''; }
             }
@@ -1826,7 +1896,8 @@
                     if (!obj || !obj.r) return null;
                     return {
                         recipient: obj.r, yourName: obj.y || 'someone who loves you',
-                        reason: obj.x || '', why: obj.w || '', extras: obj.e || []
+                        reason: obj.x || '', why: obj.w || '', extras: obj.e || [],
+                        photo: obj.p || ''
                     };
                 } catch (e) { return null; }
             }
@@ -1841,7 +1912,7 @@
                 if (!decoded) return false;
                 startWith({
                     recipient: decoded.recipient, yourName: decoded.yourName, reason: decoded.reason,
-                    why: decoded.why, extras: decoded.extras, photo: ''
+                    why: decoded.why, extras: decoded.extras, photo: decoded.photo
                 });
                 return true;
             }
@@ -1925,12 +1996,20 @@
             function showAdmin() { renderAdminList(); showPanel(adminPanel); }
             function showConfirm(data) {
                 confirmSub.textContent = 'A little ' + data._sceneCount + '-card sequence for ' + data.recipient + ', ready whenever you want to show it.';
-                shareLinkInput.value = buildShareLink(data);
+                var link = buildShareLink(data);
+                shareLinkInput.value = link;
                 var isFile = location.protocol === 'file:';
-                shareNote.textContent = isFile
-                    ? 'This link only works once this page is hosted online (e.g. GitHub Pages, Netlify) \u2014 right now it points to the file on your device, not a public web address.'
-                    : 'Anyone with this link goes straight to the apology above \u2014 no photo included, since photos make links too long.';
-                shareNote.classList.toggle('warn', isFile);
+                var isLong = link.length > 130000;
+                if (isFile) {
+                    shareNote.textContent = 'This link only works once this page is hosted online (e.g. GitHub Pages, Netlify) \u2014 right now it points to the file on your device, not a public web address.';
+                } else if (data.photo && isLong) {
+                    shareNote.textContent = 'Your photo is included in this link, which makes it quite long. It still works, but if a messaging app cuts it off, try re-adding a simpler photo.';
+                } else if (data.photo) {
+                    shareNote.textContent = 'Anyone with this link sees the apology above, including your photo.';
+                } else {
+                    shareNote.textContent = 'Anyone with this link goes straight to the apology above.';
+                }
+                shareNote.classList.toggle('warn', isFile || (!!data.photo && isLong));
                 showPanel(confirmPanel);
             }
 
@@ -2087,13 +2166,12 @@
             });
 
             exampleLink.addEventListener('click', function () {
+                resetWholeForm();
                 recipientInput.value = 'Maya';
                 yourNameInput.value = 'Theo';
                 reasonInput.value = 'I got defensive instead of just listening to you';
                 whyInput.value = "You're the person I trust with the bad days, not just the good ones";
-                clearExtraScenes();
                 addExtraSceneField('A promise', "I'm going to work on actually listening, not just waiting to reply.");
-                photoDataUrl = photoDataUrl || '';
                 state.pendingData = collectFormData();
                 showConfirm(state.pendingData);
             });
