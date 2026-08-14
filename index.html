@@ -406,6 +406,67 @@
             gap: 0.7rem;
         }
 
+        /* ---- Repeatable "extra card" blocks ---- */
+        #extraScenesContainer {
+            text-align: left;
+        }
+
+        .extra-scene-block {
+            position: relative;
+            border: 2px dashed var(--pink-2);
+            border-radius: 16px;
+            padding: 0.8rem 0.8rem 0.5rem;
+            margin-bottom: 0.9rem;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .extra-scene-block .field {
+            margin-bottom: 0.6rem;
+        }
+
+        .extra-scene-block .field:last-of-type {
+            margin-bottom: 0.2rem;
+        }
+
+        .remove-scene-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.6rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--ink-soft);
+            line-height: 1;
+            padding: 0.2rem 0.4rem;
+        }
+
+        .remove-scene-btn:hover {
+            color: var(--hot-dark);
+        }
+
+        .add-scene-btn {
+            width: 100%;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.65rem 1rem;
+            border: 2px dashed var(--pink-3);
+            border-radius: 14px;
+            background: #FFFBFC;
+            color: var(--hot-dark);
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .add-scene-btn:hover {
+            background: #FFF3F6;
+            border-color: var(--hot);
+        }
+
         /* Buttons: pill Yes/No pair, used both on consent screen and setup */
         .btn-row {
             display: flex;
@@ -711,6 +772,7 @@
             border-radius: 50%;
             background: var(--pink-2);
             transition: all 0.25s ease;
+            flex: 0 0 auto;
         }
 
         .dot.on {
@@ -966,7 +1028,7 @@
                 <p class="eyebrow">Say sorry, beautifully</p>
                 <h1 class="headline">Forgive me?</h1>
                 <p class="sub">Fill in a few words and I'll turn it into a little card sequence, made just for them.
-                    Takes about 30 seconds. &#128140;</p>
+                    Add as many extra cards as you like. &#128140;</p>
 
                 <form id="setupForm">
                     <div class="row2">
@@ -990,6 +1052,10 @@
                                 style="opacity:0.6;font-weight:500;">(optional)</span></label>
                         <textarea id="why" placeholder="You've stuck by me through the hard weeks"></textarea>
                     </div>
+
+                    <div id="extraScenesContainer"></div>
+                    <button type="button" id="addSceneBtn" class="add-scene-btn">&#10133; Add another card</button>
+
                     <div class="field">
                         <label for="photoInput">A photo of you two <span
                                 style="opacity:0.6;font-weight:500;">(optional)</span></label>
@@ -1156,6 +1222,56 @@
             var shareNote = document.getElementById('shareNote');
             var photoDataUrl = '';
 
+            /* ---------- extra ("add as many as you want") card fields ---------- */
+            var extraScenesContainer = document.getElementById('extraScenesContainer');
+            var addSceneBtn = document.getElementById('addSceneBtn');
+            var extraSceneCount = 0;
+
+            function addExtraSceneField(eyebrowVal, textVal) {
+                extraSceneCount++;
+                var id = extraSceneCount;
+                var block = document.createElement('div');
+                block.className = 'extra-scene-block';
+                block.dataset.sceneId = id;
+                block.innerHTML =
+                    '<button type="button" class="remove-scene-btn" aria-label="Remove this card">&#10005;</button>' +
+                    '<div class="field">' +
+                    '<label>Card label <span style="opacity:0.6;font-weight:500;">(optional)</span></label>' +
+                    '<input type="text" class="extra-eyebrow" placeholder="Another thing..." autocomplete="off">' +
+                    '</div>' +
+                    '<div class="field">' +
+                    '<label>Message</label>' +
+                    '<textarea class="extra-text" placeholder="Something else I want you to know..."></textarea>' +
+                    '</div>';
+                extraScenesContainer.appendChild(block);
+                if (eyebrowVal) block.querySelector('.extra-eyebrow').value = eyebrowVal;
+                if (textVal) block.querySelector('.extra-text').value = textVal;
+                block.querySelector('.remove-scene-btn').addEventListener('click', function () {
+                    block.remove();
+                });
+            }
+
+            addSceneBtn.addEventListener('click', function () {
+                addExtraSceneField();
+            });
+
+            function collectExtraScenes() {
+                var blocks = extraScenesContainer.querySelectorAll('.extra-scene-block');
+                var out = [];
+                blocks.forEach(function (block) {
+                    var eyebrow = block.querySelector('.extra-eyebrow').value.trim();
+                    var text = block.querySelector('.extra-text').value.trim();
+                    if (eyebrow || text) {
+                        out.push({ eyebrow: eyebrow || 'One more thing', text: text || '...' });
+                    }
+                });
+                return out;
+            }
+
+            function clearExtraScenes() {
+                extraScenesContainer.innerHTML = '';
+            }
+
             photoDrop.addEventListener('click', function () { photoInput.click(); });
             photoInput.addEventListener('change', function () {
                 var file = photoInput.files && photoInput.files[0];
@@ -1188,7 +1304,7 @@
             function encodeApology(data) {
                 try {
                     return btoa(encodeURIComponent(JSON.stringify({
-                        r: data.recipient, y: data.yourName, x: data.reason, w: data.why
+                        r: data.recipient, y: data.yourName, x: data.reason, w: data.why, e: data.extras || []
                     })));
                 } catch (e) { return ''; }
             }
@@ -1196,7 +1312,10 @@
                 try {
                     var obj = JSON.parse(decodeURIComponent(atob(str)));
                     if (!obj || !obj.r) return null;
-                    return { recipient: obj.r, yourName: obj.y || 'someone who loves you', reason: obj.x || '', why: obj.w || '' };
+                    return {
+                        recipient: obj.r, yourName: obj.y || 'someone who loves you',
+                        reason: obj.x || '', why: obj.w || '', extras: obj.e || []
+                    };
                 } catch (e) { return null; }
             }
             function buildShareLink(data) {
@@ -1208,18 +1327,29 @@
                 if (!match) return false;
                 var decoded = decodeApology(match[1]);
                 if (!decoded) return false;
-                startWith({ recipient: decoded.recipient, yourName: decoded.yourName, reason: decoded.reason, why: decoded.why, photo: '' });
+                startWith({
+                    recipient: decoded.recipient, yourName: decoded.yourName, reason: decoded.reason,
+                    why: decoded.why, extras: decoded.extras, photo: ''
+                });
                 return true;
             }
 
             function buildScenes(data) {
-                return [
+                var scenes = [
                     { eyebrow: 'Forgive me?', text: "I'm sorry, " + data.recipient + "." },
                     { eyebrow: 'What happened', text: data.reason || "I made a mistake, and I know it." },
                     { eyebrow: "What I've realized", text: "You deserved better than that. I care about you more than being right." },
-                    { eyebrow: 'Why this matters', text: data.why || "Because what we have means more to me than any argument." },
-                    { eyebrow: 'So, simply \u2014', text: "I'm really sorry, " + data.recipient + ". Truly.", signature: '\u2014 ' + data.yourName }
+                    { eyebrow: 'Why this matters', text: data.why || "Because what we have means more to me than any argument." }
                 ];
+                (data.extras || []).forEach(function (extra) {
+                    scenes.push({ eyebrow: extra.eyebrow, text: extra.text });
+                });
+                scenes.push({
+                    eyebrow: 'So, simply \u2014',
+                    text: "I'm really sorry, " + data.recipient + ". Truly.",
+                    signature: '\u2014 ' + data.yourName
+                });
+                return scenes;
             }
 
             function buildDots() {
@@ -1278,7 +1408,7 @@
             function showStory() { showPanel(storyPanel); }
             function showSetup() { showPanel(setupPanel); }
             function showConfirm(data) {
-                confirmSub.textContent = 'A little card sequence for ' + data.recipient + ', ready whenever you want to show it.';
+                confirmSub.textContent = 'A little ' + data._sceneCount + '-card sequence for ' + data.recipient + ', ready whenever you want to show it.';
                 shareLinkInput.value = buildShareLink(data);
                 var isFile = location.protocol === 'file:';
                 shareNote.textContent = isFile
@@ -1307,13 +1437,16 @@
             }
 
             function collectFormData() {
-                return {
+                var data = {
                     recipient: recipientInput.value.trim() || 'you',
                     yourName: yourNameInput.value.trim() || 'someone who loves you',
                     reason: reasonInput.value.trim(),
                     why: whyInput.value.trim(),
+                    extras: collectExtraScenes(),
                     photo: photoDataUrl
                 };
+                data._sceneCount = buildScenes(data).length;
+                return data;
             }
 
             setupForm.addEventListener('submit', function (e) {
@@ -1327,6 +1460,8 @@
                 yourNameInput.value = 'Theo';
                 reasonInput.value = 'I got defensive instead of just listening to you';
                 whyInput.value = "You're the person I trust with the bad days, not just the good ones";
+                clearExtraScenes();
+                addExtraSceneField('A promise', "I'm going to work on actually listening, not just waiting to reply.");
                 photoDataUrl = photoDataUrl || '';
                 state.pendingData = collectFormData();
                 showConfirm(state.pendingData);
