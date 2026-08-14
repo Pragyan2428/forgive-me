@@ -46,9 +46,23 @@
                 radial-gradient(circle at 15% 10%, #FFF0E8 0%, transparent 45%),
                 radial-gradient(circle at 85% 15%, #FFE0EA 0%, transparent 50%),
                 linear-gradient(160deg, #FFEDE4 0%, #FFDCE6 45%, #FFCBDD 100%);
+            background-size: 140% 140%, 140% 140%, 180% 180%;
+            animation: bgDrift 16s ease-in-out infinite;
             overflow-x: hidden;
             position: relative;
             padding: calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left));
+        }
+
+        @keyframes bgDrift {
+
+            0%,
+            100% {
+                background-position: 0% 0%, 100% 0%, 50% 50%;
+            }
+
+            50% {
+                background-position: 10% 10%, 90% 15%, 55% 45%;
+            }
         }
 
         /* ---------- Floating decoration layer ---------- */
@@ -148,6 +162,19 @@
                 0 2px 0 rgba(255, 255, 255, 0.8) inset;
             border: 2px solid #FFFFFF;
             position: relative;
+            animation: cardPopIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        @keyframes cardPopIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.88) translateY(18px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         /* Cat mascot, built in CSS */
@@ -358,6 +385,88 @@
             border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
         }
 
+        .whisker {
+            position: absolute;
+            top: 60px;
+            width: 22px;
+            height: 2px;
+            background: #C98A9A;
+            border-radius: 2px;
+            transform-origin: center;
+            animation: whiskerTwitch 3.8s ease-in-out infinite;
+        }
+
+        .whisker.left {
+            left: -18px;
+        }
+
+        .whisker.right {
+            right: -18px;
+        }
+
+        .whisker.left.w1 {
+            top: 55px;
+            --wr: -6deg;
+        }
+
+        .whisker.left.w2 {
+            top: 63px;
+            --wr: 4deg;
+        }
+
+        .whisker.right.w1 {
+            top: 55px;
+            --wr: 6deg;
+        }
+
+        .whisker.right.w2 {
+            top: 63px;
+            --wr: -4deg;
+        }
+
+        .whisker.right {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes whiskerTwitch {
+
+            0%,
+            88%,
+            100% {
+                transform: rotate(var(--wr, 0deg)) scaleX(1);
+            }
+
+            92% {
+                transform: rotate(var(--wr, 0deg)) scaleX(0.85);
+            }
+        }
+
+        .tail {
+            position: absolute;
+            bottom: -2px;
+            right: -14px;
+            width: 10px;
+            height: 30px;
+            background: #FFFFFF;
+            border: 3px solid #4A3540;
+            border-radius: 50% 50% 0 50%;
+            transform-origin: bottom center;
+            animation: tailWag 2.2s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes tailWag {
+
+            0%,
+            100% {
+                transform: rotate(8deg);
+            }
+
+            50% {
+                transform: rotate(-14deg);
+            }
+        }
+
         .mouth {
             position: absolute;
             left: 50%;
@@ -462,6 +571,19 @@
             color: var(--hot-dark);
             margin: 0.2rem 0 0.6rem;
             line-height: 1.1;
+            animation: headlineRise 0.6s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes headlineRise {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         p.sub {
@@ -611,6 +733,19 @@
             background: linear-gradient(180deg, #FF8CA8, var(--hot));
             color: #fff;
             box-shadow: 0 10px 18px -6px rgba(232, 84, 124, 0.55);
+            animation: btnPulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes btnPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 10px 18px -6px rgba(232, 84, 124, 0.55);
+            }
+
+            50% {
+                box-shadow: 0 10px 22px -4px rgba(232, 84, 124, 0.8);
+            }
         }
 
         .btn-yes:hover {
@@ -648,6 +783,7 @@
             margin-top: 0.3rem;
             transition: transform 0.15s ease, filter 0.15s ease;
             min-height: 48px;
+            animation: btnPulse 2.4s ease-in-out infinite;
         }
 
         .primary-btn:hover {
@@ -700,7 +836,19 @@
             padding: 6px;
             background: #fff;
             box-shadow: 0 10px 24px -10px rgba(214, 110, 140, 0.45), 0 0 0 2px var(--pink-2);
-            transform: rotate(-3deg);
+            animation: photoSway 4.5s ease-in-out infinite;
+        }
+
+        @keyframes photoSway {
+
+            0%,
+            100% {
+                transform: rotate(-3deg);
+            }
+
+            50% {
+                transform: rotate(2deg);
+            }
         }
 
         .story-photo-wrap img {
@@ -751,6 +899,7 @@
             justify-content: center;
             border: 3px solid var(--card);
             box-shadow: 0 4px 10px -2px rgba(79, 203, 132, 0.55);
+            animation: badgePop 0.55s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
         }
 
         #confirm .headline {
@@ -869,12 +1018,12 @@
         }
 
         .scene {
-            transition: opacity 0.35s ease, transform 0.35s ease;
+            transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1), transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .scene.fading {
             opacity: 0;
-            transform: translateY(6px);
+            transform: translateY(10px) scale(0.97);
         }
 
         .dots {
@@ -898,6 +1047,19 @@
             background: var(--hot);
             width: 18px;
             border-radius: 4px;
+            animation: dotPulse 1.6s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.55;
+            }
         }
 
         .nav-btn {
@@ -949,6 +1111,50 @@
 
         .badge {
             font-size: 1.1rem;
+            display: inline-block;
+            animation: badgePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+                badgeFloat 2.4s ease-in-out 0.6s infinite;
+        }
+
+        .badge:nth-child(1) {
+            animation-delay: 0s, 0.6s;
+        }
+
+        .badge:nth-child(2) {
+            animation-delay: 0.15s, 0.75s;
+        }
+
+        .badge:nth-child(3) {
+            animation-delay: 0.3s, 0.9s;
+        }
+
+        @keyframes badgePop {
+            0% {
+                opacity: 0;
+                transform: scale(0) translateY(10px);
+            }
+
+            70% {
+                opacity: 1;
+                transform: scale(1.25) translateY(-4px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes badgeFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-5px) rotate(-6deg);
+            }
         }
 
         footer.tag {
@@ -1140,7 +1346,12 @@
                         <div class="blush right"></div>
                         <div class="snout"></div>
                         <div class="mouth"></div>
+                        <div class="whisker left w1"></div>
+                        <div class="whisker left w2"></div>
+                        <div class="whisker right w1"></div>
+                        <div class="whisker right w2"></div>
                     </div>
+                    <div class="tail"></div>
                     <div class="paw"></div>
                 </div>
 
@@ -1208,7 +1419,12 @@
                         <div class="blush right"></div>
                         <div class="snout"></div>
                         <div class="mouth"></div>
+                        <div class="whisker left w1"></div>
+                        <div class="whisker left w2"></div>
+                        <div class="whisker right w1"></div>
+                        <div class="whisker right w2"></div>
                     </div>
+                    <div class="tail"></div>
                     <div class="paw"></div>
                     <div class="ready-badge" aria-hidden="true">&#10003;</div>
                 </div>
@@ -1255,7 +1471,12 @@
                         <div class="blush right"></div>
                         <div class="snout"></div>
                         <div class="mouth"></div>
+                        <div class="whisker left w1"></div>
+                        <div class="whisker left w2"></div>
+                        <div class="whisker right w1"></div>
+                        <div class="whisker right w2"></div>
                     </div>
+                    <div class="tail"></div>
                     <div class="paw"></div>
                 </div>
 
@@ -1519,7 +1740,7 @@
 
                 if (skipFade) { apply(); return; }
                 sceneEl.classList.add('fading');
-                setTimeout(apply, 200);
+                setTimeout(apply, 220);
             }
 
             function showPanel(panel) {
